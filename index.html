@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Capture</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<video id="video" width="640" height="480" autoplay></video>
+<button id="snap">Snap Photo</button>
+<canvas id="canvas" width="640" height="480"></canvas>
+
+<script>
+    // Get access to the camera
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+            video.play();
+        });
+    }
+
+    // Trigger photo take
+    document.getElementById("snap").addEventListener("click", function() {
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, 640, 480);
+
+        // Convert canvas to base64
+        let imageData = canvas.toDataURL('image/png');
+        console.log(imageData);
+
+        // Sending image data to the server using Axios
+        axios.post('/take-attendanc', {
+            image: imageData,
+            school_id: 'YOUR_SCHOOL_ID',
+            role: 'YOUR_ROLE',
+            uid: 'YOUR_UID',
+            type: 'YOUR_TYPE'
+        }).then(response => {
+            console.log(response.data);
+        }).catch(error => {
+            console.error("Error:", error);
+        });
+    });
+</script>
+
+</body>
+</html>
